@@ -4,6 +4,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="this is a sample blog">
+        <meta name="keywords" content="python django">
         <title>
             {% block title %}
             {% endblock title %}
@@ -16,7 +18,9 @@
             {% endblock content %}
         </div>
         <div id="sidebar">
-            <h2>My Blog</h2>
+            <h2>
+                <a href="{% url 'blog:post_list' %}">My Blog</a>
+            </h2>
             <p>This is my blog.</p>
         </div>
     </body>
