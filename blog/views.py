@@ -47,8 +47,10 @@ def post_detail(request, year, month, day, post):
         publish__month=month,
         publish__day=day,
     )
+    comments = post.comments.filter(active=True)
+    form = CommentForm()
 
-    return render(request=request, template_name='blog/post/detail.html', context={'post': post})
+    return render(request=request, template_name='blog/post/detail.html', context={'post': post, 'comments': comments, 'form': form})
 
 
 def post_share(request, post_id):
