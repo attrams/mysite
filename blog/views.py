@@ -5,9 +5,10 @@ from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 
 from .models import Post, Comment
-from .forms import EmailPostForm, CommentForm
+from .forms import EmailPostForm, CommentForm, SearchForm
 # Create your views here.
 
 
@@ -109,3 +110,26 @@ def post_comment(request, post_id):
         comment.save()
 
     return render(request=request, template_name='blog/post/comment.html', context={'post': post, 'form': form, 'comment': comment})
+
+
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+
+    print(request.GET)  # just to check the object, you can delete this line
+
+    if 'query' in request.GET:
+        form = SearchForm(request.GET)
+
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            search_vector = SearchVector(
+                'title', weight='A') + SearchVector('body', weight='B')
+            search_query = SearchQuery(query)
+            results = Post.objects.annotate(
+                search=search_vector,
+                rank=SearchRank(vector=search_vector, query=search_query)
+            ).filter(rank__gte=0.3).order_by('-rank')
+
+    return render(request=request, template_name='blog/post/search.html', context={'form': form, 'query': query, 'results': results})
